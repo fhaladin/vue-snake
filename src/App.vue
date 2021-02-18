@@ -20,6 +20,7 @@ export default {
   },
   data () {
     return {
+      isGameOver: false,
       game: {
         area: null,
         w: 400,
@@ -50,11 +51,21 @@ export default {
     'snake.head.x' (val) {
       if (val === 0 || val === this.game.w - this.snake.w) {
         clearInterval(this.move.interval)
+        this.isGameOver = true
       }
     },
     'snake.head.y' (val) {
       if (val === 0 || val === this.game.h - this.snake.h) {
         clearInterval(this.move.interval)
+        this.isGameOver = true
+      }
+    },
+    isGameOver (val) {
+      if (val) {
+        this.game.area.fillStyle = 'red'
+        this.game.area.textAlign = 'center'
+        this.game.area.font = '30px Arial';
+        this.game.area.fillText('Game Over', this.game.w/2, this.game.h/2)
       }
     }
   },
@@ -151,19 +162,21 @@ export default {
     /** Movement */
     sMove (dir, dis) {
       this.move.interval = setInterval(() => {
-        this.removeSnake()
-        if (this.snake.body.length !== 0) {
-          this.snake.body.pop()
-          this.snake.body.unshift({...this.snake.head})
+        if (!this.isGameOver) {
+          this.removeSnake()
+          if (this.snake.body.length !== 0) {
+            this.snake.body.pop()
+            this.snake.body.unshift({...this.snake.head})
+          }
+  
+          this.snake.head[dir] += dis
+          
+          if (this.snake.head.x === this.food.x && this.snake.head.y === this.food.y) {
+            this.eat()
+          }
+  
+          this.dSnake()
         }
-
-        this.snake.head[dir] += dis
-        
-        if (this.snake.head.x === this.food.x && this.snake.head.y === this.food.y) {
-          this.eat()
-        }
-
-        this.dSnake()
       }, this.move.time * 1000)
     },
 
